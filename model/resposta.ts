@@ -4,10 +4,10 @@ export default class RespostaModel {
     #revelada: boolean
 
     static certa(valor:string){
-        return new RespostaModel(valor,true)
+        return new RespostaModel(valor,true,false)
     }
     static errada(valor:string){
-        return new RespostaModel(valor,false)
+        return new RespostaModel(valor,false,false)
     }
 
 
@@ -28,6 +28,10 @@ export default class RespostaModel {
     }
     revelar(){
         return new RespostaModel(this.#valor, this.#certa,true)
+    }
+
+    static criarUsandoObjeto(obj:RespostaModel): RespostaModel {
+        return new RespostaModel(obj.valor, obj.certa, obj.revelada)
     }
     ConverterparaObjeto(){
         return {

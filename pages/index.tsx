@@ -1,40 +1,57 @@
 import { useEffect, useRef, useState } from 'react'
-import Botao from '../components/botao/Botao'
-import Questao from '../components/questao/Questao'
+import Questionario from '../components/questionario/Questionario'
 import QuestaoModel from '../model/questao'
 import RespostaModel from '../model/resposta'
+
+
 const questaoMock = new QuestaoModel(1, 'Melhor cor?', [
   RespostaModel.errada('Verde'),
   RespostaModel.errada('Vermelho'),
   RespostaModel.errada('Azul'),
   RespostaModel.certa('Preto')
 ])
+const BASE_URL = 'http://localhost:3000/api'
 
 export default function Home() {
-  const [questao, setQuestao] = useState(questaoMock)
+  const [idsDasQuestoes,setIdsDasQuestoes] = useState<number[]>([])
+  const [questao, setQuestao] = useState<QuestaoModel>(questaoMock)
   
+  async function carregarIdsQuestoes(){
+    const resp = await fetch(`${BASE_URL}/questionario`);
+    const idsDasQuestoes = await resp.json();
+    setIdsDasQuestoes(idsDasQuestoes);
+  }
 
-  function respostaFornecida(indice: number) {
-    setQuestao(questao.responderCom(indice))
+  async function carregarQuestoes(idQuestao:number){
+    const resp = await fetch(`${BASE_URL}/questoes/${idQuestao}`);
+    const json = await resp.json();
+    const novaQuestao = QuestaoModel.criarUsandoObjeto(json)
+    setQuestao(novaQuestao);
   }
-  function tempoEsgotado() {
-    if (questao.naoRespondida) {
-      setQuestao(questao.responderCom(1))
-    }
+
+  useEffect(()=>{
+    carregarIdsQuestoes()
+  }, []);
+
+  useEffect(()=>{
+    idsDasQuestoes.length > 0 && carregarQuestoes(idsDasQuestoes[0])
+  }, [idsDasQuestoes]);
+
+  function questaoRespondida(questao:QuestaoModel){
+
   }
+  function irParaProximoPasso(){
+
+  }
+ 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection:'column',
-      height: '100vh',
-      justifyContent: 'center',
-      alignItems: 'center'
-    }}>
-      <Questao valor={questao}
-        tempoPraResposta={10}
-        respostaFornecida={respostaFornecida}
-        tempoEsgotado={tempoEsgotado} />
-        <Botao texto="Próxima" href='/resultado'/>
-    </div>
+    
+     <Questionario 
+     questao={questao}
+     ultima={true}
+     questaoRespondida={questaoRespondida}
+     irParaProximopasso={irParaProximoPasso}
+     />
+    
   )
 }
